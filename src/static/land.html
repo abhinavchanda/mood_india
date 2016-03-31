@@ -1,0 +1,101 @@
+<html>
+Working
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
+<script src="https://code.highcharts.com/maps/highmaps.js"></script>
+<script src="https://code.highcharts.com/maps/modules/data.js"></script>
+<script src="https://code.highcharts.com/mapdata/countries/us/us-all.js"></script>
+
+
+<div id="container" style="height: 500px; min-width: 310px; max-width: 600px; margin: 0 auto"></div>
+<script>
+$.ajax({
+                    contentType: "application/json; charset=utf-8",
+                    url : "/start",
+                    type: "POST",
+                    data : {"time":"300"},
+                    success:function(result) {   
+                        console.log(result)
+                        //window.location.replace(result);    // go to a new page
+                    },
+                    error: function(request, status, error) {
+                        console.log(request.responseText);
+                    }
+                });
+
+function wait(){
+    $.ajax({
+                    contentType: "application/json; charset=utf-8",
+                    url : "/json",
+                    type: "POST",
+                    data : {},
+                    success:function(result) {  
+                        data=JSON.parse(result) 
+                        $.each(data, function () {
+                        this.code = this.code.toUpperCase();
+                        });
+
+        // Instansiate the map
+                        $('#container').highcharts('Map', {
+
+            chart : {
+                borderWidth : 1
+            },
+
+            title : {
+                text : 'Sentiment Polarity'
+            },
+
+            legend: {
+                layout: 'horizontal',
+                borderWidth: 0,
+                backgroundColor: 'rgba(255,255,255,0.85)',
+                floating: true,
+                verticalAlign: 'top',
+                y: 25
+            },
+
+            mapNavigation: {
+                enabled: true
+            },
+
+            colorAxis: {
+                min: -75,
+                type: 'linear',
+                stops: [
+                [0, '#30600f'],
+                [0.5, '#fffbbc'],
+                [0.9, '#c4463a']
+                ]
+            },
+
+            series : [{
+                animation: {
+                    duration: 1000
+                },
+                data : data,
+                mapData: Highcharts.maps['countries/us/us-all'],
+                joinBy: ['postal-code', 'code'],
+                dataLabels: {
+                    enabled: true,
+                    color: 'white',
+                    format: '{point.code}'
+                },
+                name: 'Sentiment',
+                tooltip: {
+                    pointFormat: '{point.code}: {point.value}'
+                }
+            }]
+                        });
+                        //console.log(JSON.parse(result));
+                        //window.location.replace(result);    // go to a new page
+                    },
+                    error: function(request, status, error) {
+                        console.log(request.responseText);
+                    }
+                });
+}
+setTimeout(wait,15000);
+
+</script>
+
+</html>
